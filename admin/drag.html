@@ -1,0 +1,100 @@
+<?php include('db_connect.php');?>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+
+  
+
+  <!-- DayPilot library -->
+  <script src="js/daypilot/daypilot-all.min.js"></script>
+</head>
+<body>
+
+
+<div class="main">
+  <div id="dp"></div>
+</div>
+    
+<script>
+    var dp = new DayPilot.Calendar("dp", {
+      locale: "en-us",
+      columnWidthSpec: "Auto",
+      viewType: "Resources",
+      headerLevels: 1,
+      headerHeight: 30,
+      cellHeight: 30,
+      crosshairType: "Header",
+      showCurrentTime: false,
+      eventArrangement: "Cascade",
+      allowEventOverlap: false,
+      timeRangeSelectedHandling: "Enabled",
+      onTimeRangeSelected: async (args) => {
+        const modal = await DayPilot.Modal.prompt("Create a new event:", "Event 3");
+        const dp = args.control;
+        dp.clearSelection();
+        if (modal.canceled) { return; }
+        dp.events.add({
+          start: args.start,
+          end: args.end,
+          id: DayPilot.guid(),
+          text: modal.result,
+          resource: args.resource
+        });
+      },
+      eventDeleteHandling: "Update",
+      onEventDeleted: (args) => {
+        args.control.message("Event deleted: " + args.e.text());
+      },
+      eventMoveHandling: "Update",
+      onEventMoved: (args) => {
+        args.control.message("Event moved: " + args.e.text());
+      },
+      eventResizeHandling: "Update",
+      onEventResized: (args) => {
+        args.control.message("Event resized: " + args.e.text());
+      },
+      eventClickHandling: "Edit",
+      eventEditHandling: "Update",
+      onEventEdited: (args) => {
+        args.control.message("Event edited: " + args.e.text());
+      },
+      eventHoverHandling: "Bubble",
+      bubble: new DayPilot.Bubble({
+        onLoad: (args) => {
+          // if event object doesn't specify "bubbleHtml" property 
+          // this onLoad handler will be called to provide the bubble HTML
+          args.html = "Event details";
+        }
+      }),
+      contextMenu: new DayPilot.Menu({
+        items: [
+          { text: "Delete", onClick: (args) => { const dp = args.source.calendar; dp.events.remove(args.source); } }
+        ]
+      }),
+    });
+    dp.events.list = [
+      {
+        id: "1",
+        start: DayPilot.Date.today().addHours(0),
+        end: DayPilot.Date.today().addHours(0),
+        text: "",
+        resource: ""
+      }
+    ];
+  dp.columns = [
+    {name: "Monday", id: "R1"},
+    {name: "Tuesday", id: "R2"},
+    {name: "Wednesday", id: "R3"},
+    {name: "Thursday", id: "R4"},
+    {name: "Friday", id: "R5"},
+    {name: "Saturday", id: "R6"}
+  ];
+  dp.init();
+  
+</script>
+
+</body>
+</html>
